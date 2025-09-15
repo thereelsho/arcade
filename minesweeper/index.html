@@ -1,16 +1,93 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Minesweeper</title>
   <style>
-    body { background:#111; color:#eee; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-    h1 { font-size:3em; }
+    body { background:#000; color:#fff; text-align:center; font-family:Arial; }
+    table { margin:20px auto; border-collapse:collapse; }
+    td {
+      width:30px; height:30px; text-align:center;
+      background:#333; color:#fff; font-weight:bold;
+      border:1px solid #555; cursor:pointer;
+    }
+    td.revealed { background:#222; cursor:default; }
+    td.mine { background:red; }
   </style>
 </head>
 <body>
-  <h1>Minesweeper Placeholder</h1>
-  <p>This is a placeholder for Minesweeper. You can replace it with the actual game files.</p>
+  <h1>Minesweeper</h1>
+  <div id="board"></div>
+  <script>
+    const rows = 9, cols = 9, minesCount = 10;
+    let board = [], revealed = [];
+
+    function init() {
+      board = Array(rows).fill().map(()=>Array(cols).fill(0));
+      revealed = Array(rows).fill().map(()=>Array(cols).fill(false));
+
+      let placed = 0;
+      while (placed < minesCount) {
+        let r = Math.floor(Math.random()*rows);
+        let c = Math.floor(Math.random()*cols);
+        if (board[r][c] === 0) {
+          board[r][c] = "M";
+          placed++;
+        }
+      }
+
+      for (let r=0;r<rows;r++) {
+        for (let c=0;c<cols;c++) {
+          if (board[r][c] !== "M") {
+            let count = 0;
+            for (let dr=-1; dr<=1; dr++) {
+              for (let dc=-1; dc<=1; dc++) {
+                if (board[r+dr] && board[r+dr][c+dc] === "M") count++;
+              }
+            }
+            board[r][c] = count;
+          }
+        }
+      }
+      draw();
+    }
+
+    function reveal(r,c) {
+      if (r<0||c<0||r>=rows||c>=cols||revealed[r][c]) return;
+      revealed[r][c] = true;
+      let cell = document.getElementById(`cell-${r}-${c}`);
+      cell.classList.add("revealed");
+      if (board[r][c] === "M") {
+        cell.classList.add("mine");
+        cell.innerHTML = "💣";
+        alert("Game Over!");
+        init();
+      } else if (board[r][c] === 0) {
+        cell.innerHTML = "";
+        for (let dr=-1;dr<=1;dr++) {
+          for (let dc=-1;dc<=1;dc++) {
+            reveal(r+dr,c+dc);
+          }
+        }
+      } else {
+        cell.innerHTML = board[r][c];
+      }
+    }
+
+    function draw() {
+      let html = "<table>";
+      for (let r=0;r<rows;r++) {
+        html += "<tr>";
+        for (let c=0;c<cols;c++) {
+          html += `<td id="cell-${r}-${c}" onclick="reveal(${r},${c})"></td>`;
+        }
+        html += "</tr>";
+      }
+      html += "</table>";
+      document.getElementById("board").innerHTML = html;
+    }
+
+    init();
+  </script>
 </body>
 </html>

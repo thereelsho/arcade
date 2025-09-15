@@ -1,16 +1,121 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Spaceinvaders</title>
+  <title>Space Invaders</title>
   <style>
-    body { background:#111; color:#eee; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-    h1 { font-size:3em; }
+    body { background:#000; color:#fff; text-align:center; font-family:Arial; }
+    canvas { background:#111; display:block; margin:20px auto; }
   </style>
 </head>
 <body>
-  <h1>Spaceinvaders Placeholder</h1>
-  <p>This is a placeholder for Spaceinvaders. You can replace it with the actual game files.</p>
+  <h1>Space Invaders</h1>
+  <canvas id="invaders" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("invaders");
+    const ctx = canvas.getContext("2d");
+
+    class Player {
+      constructor() {
+        this.x = canvas.width / 2 - 15;
+        this.y = canvas.height - 30;
+        this.w = 30; this.h = 15;
+        this.speed = 5;
+      }
+      draw() {
+        ctx.fillStyle = "lime";
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+      }
+    }
+
+    class Bullet {
+      constructor(x, y) {
+        this.x = x; this.y = y; this.dy = -5;
+      }
+      draw() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(this.x, this.y, 2, 10);
+      }
+      update() { this.y += this.dy; }
+    }
+
+    class Invader {
+      constructor(x, y) {
+        this.x = x; this.y = y; this.w = 20; this.h = 15;
+      }
+      draw() {
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+      }
+    }
+
+    const player = new Player();
+    const bullets = [];
+    const invaders = [];
+    let keys = {};
+    let dx = 1;
+
+    // Create invader grid
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 10; c++) {
+        invaders.push(new Invader(50 + c * 40, 30 + r * 30));
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      player.draw();
+      bullets.forEach(b => { b.update(); b.draw(); });
+      invaders.forEach(i => i.draw());
+    }
+
+    function update() {
+      // Move player
+      if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+      if (keys["ArrowRight"] && player.x + player.w < canvas.width) player.x += player.speed;
+
+      // Move invaders
+      let hitEdge = false;
+      invaders.forEach(i => {
+        i.x += dx;
+        if (i.x + i.w > canvas.width || i.x < 0) hitEdge = true;
+      });
+      if (hitEdge) {
+        dx *= -1;
+        invaders.forEach(i => i.y += 10);
+      }
+
+      // Bullet collision
+      bullets.forEach((b, bi) => {
+        invaders.forEach((i, ii) => {
+          if (b.x < i.x + i.w && b.x > i.x && b.y < i.y + i.h && b.y > i.y) {
+            invaders.splice(ii, 1);
+            bullets.splice(bi, 1);
+          }
+        });
+      });
+
+      if (invaders.length === 0) {
+        alert("You win!");
+        document.location.reload();
+      }
+    }
+
+    function loop() {
+      draw();
+      update();
+      requestAnimationFrame(loop);
+    }
+
+    document.addEventListener("keydown", e => {
+      keys[e.key] = true;
+      if (e.key === " ") {
+        bullets.push(new Bullet(player.x + player.w/2, player.y));
+      }
+    });
+    document.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    loop();
+  </script>
 </body>
 </html>

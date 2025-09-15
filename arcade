@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Arcade</title>
+  <style>
+    body {{ background:#111; color:#eee; font-family:Arial,sans-serif; text-align:center; padding-top:50px; }}
+    h1 {{ font-size:3em; margin-bottom:20px; }}
+    .menu {{ display:flex; flex-direction:column; align-items:center; gap:15px; }}
+    a {{ display:inline-block; padding:10px 20px; background:#222; color:#eee; text-decoration:none; border-radius:8px; width:200px; text-align:center; }}
+    a:hover {{ background:#444; }}
+  </style>
+</head>
+<body>
+  <h1>Simple Arcade</h1>
+  <div class="menu">
+    <a href="tetris/index.html">Tetris</a>
+    <a href="snake/index.html">Snake</a>
+    <a href="pacman/index.html">Pacman</a>
+    <a href="pong/index.html">Pong</a>
+    <a href="breakout/index.html">Breakout</a>
+    <a href="flappybird/index.html">Flappybird</a>
+    <a href="minesweeper/index.html">Minesweeper</a>
+    <a href="2048/index.html">2048</a>
+    <a href="asteroids/index.html">Asteroids</a>
+    <a href="spaceinvaders/index.html">Spaceinvaders</a>
+  </div>
+</body>
+</html>

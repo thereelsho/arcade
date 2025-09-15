@@ -1,16 +1,123 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Asteroids</title>
   <style>
-    body { background:#111; color:#eee; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-    h1 { font-size:3em; }
+    body { background:#000; color:#fff; text-align:center; font-family:Arial; }
+    canvas { background:#111; display:block; margin:20px auto; }
   </style>
 </head>
 <body>
-  <h1>Asteroids Placeholder</h1>
-  <p>This is a placeholder for Asteroids. You can replace it with the actual game files.</p>
+  <h1>Asteroids</h1>
+  <canvas id="asteroids" width="600" height="400"></canvas>
+  <script>
+    const canvas=document.getElementById("asteroids");
+    const ctx=canvas.getContext("2d");
+
+    class Ship {
+      constructor(){ this.x=300; this.y=200; this.angle=0; this.speed=0; }
+      draw(){
+        ctx.save();
+        ctx.translate(this.x,this.y);
+        ctx.rotate(this.angle);
+        ctx.beginPath();
+        ctx.moveTo(10,0);
+        ctx.lineTo(-10,-7);
+        ctx.lineTo(-10,7);
+        ctx.closePath();
+        ctx.strokeStyle="white";
+        ctx.stroke();
+        ctx.restore();
+      }
+      update(){
+        this.x+=Math.cos(this.angle)*this.speed;
+        this.y+=Math.sin(this.angle)*this.speed;
+        if(this.x<0) this.x=canvas.width;
+        if(this.x>canvas.width) this.x=0;
+        if(this.y<0) this.y=canvas.height;
+        if(this.y>canvas.height) this.y=0;
+      }
+    }
+
+    class Asteroid {
+      constructor(){ 
+        this.x=Math.random()*canvas.width; 
+        this.y=Math.random()*canvas.height; 
+        this.r=20+Math.random()*30; 
+        this.dx=Math.random()*2-1; 
+        this.dy=Math.random()*2-1;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+        ctx.strokeStyle="white";
+        ctx.stroke();
+      }
+      update(){
+        this.x+=this.dx;
+        this.y+=this.dy;
+        if(this.x<0) this.x=canvas.width;
+        if(this.x>canvas.width) this.x=0;
+        if(this.y<0) this.y=canvas.height;
+        if(this.y>canvas.height) this.y=0;
+      }
+    }
+
+    class Bullet {
+      constructor(x,y,angle){
+        this.x=x; this.y=y; this.angle=angle; this.life=60;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,2,0,Math.PI*2);
+        ctx.fillStyle="white";
+        ctx.fill();
+      }
+      update(){
+        this.x+=Math.cos(this.angle)*5;
+        this.y+=Math.sin(this.angle)*5;
+        if(this.x<0) this.x=canvas.width;
+        if(this.x>canvas.width) this.x=0;
+        if(this.y<0) this.y=canvas.height;
+        if(this.y>canvas.height) this.y=0;
+        this.life--;
+      }
+    }
+
+    const ship=new Ship();
+    let keys={};
+    let asteroids=[];
+    let bullets=[];
+
+    for(let i=0;i<5;i++) asteroids.push(new Asteroid());
+
+    function loop(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ship.update();
+      ship.draw();
+
+      if(keys["ArrowLeft"]) ship.angle-=0.05;
+      if(keys["ArrowRight"]) ship.angle+=0.05;
+      if(keys["ArrowUp"]) ship.speed=2;
+      else ship.speed=0;
+
+      asteroids.forEach(a=>{ a.update(); a.draw(); });
+      bullets.forEach((b,i)=>{
+        b.update(); b.draw();
+        if(b.life<=0) bullets.splice(i,1);
+      });
+
+      requestAnimationFrame(loop);
+    }
+
+    document.addEventListener("keydown",e=>{
+      keys[e.key]=true;
+      if(e.key===" ") bullets.push(new Bullet(ship.x,ship.y,ship.angle));
+    });
+    document.addEventListener("keyup",e=>{ keys[e.key]=false; });
+
+    loop();
+  </script>
 </body>
 </html>

@@ -1,16 +1,107 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Pong</title>
   <style>
-    body { background:#111; color:#eee; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-    h1 { font-size:3em; }
+    body { background: #000; color: #fff; text-align: center; font-family: Arial; }
+    canvas { background: #111; display: block; margin: 20px auto; }
   </style>
 </head>
 <body>
-  <h1>Pong Placeholder</h1>
-  <p>This is a placeholder for Pong. You can replace it with the actual game files.</p>
+  <h1>Pong</h1>
+  <canvas id="pong" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    const paddleHeight = 80, paddleWidth = 10;
+    let leftPaddle = { x: 10, y: canvas.height/2 - paddleHeight/2, dy: 0 };
+    let rightPaddle = { x: canvas.width - paddleWidth - 10, y: canvas.height/2 - paddleHeight/2, dy: 4 };
+    let ball = { x: canvas.width/2, y: canvas.height/2, dx: 4, dy: 4, size: 10 };
+    let leftScore = 0, rightScore = 0;
+
+    function drawRect(x,y,w,h,color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x,y,w,h);
+    }
+
+    function drawCircle(x,y,r,color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawText(text,x,y,color) {
+      ctx.fillStyle = color;
+      ctx.font = "30px Arial";
+      ctx.fillText(text,x,y);
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawText(leftScore, canvas.width/4, 50, "white");
+      drawText(rightScore, 3*canvas.width/4, 50, "white");
+      drawRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight, "white");
+      drawRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight, "white");
+      drawCircle(ball.x, ball.y, ball.size, "white");
+    }
+
+    function move() {
+      leftPaddle.y += leftPaddle.dy;
+      if (leftPaddle.y < 0) leftPaddle.y = 0;
+      if (leftPaddle.y + paddleHeight > canvas.height) leftPaddle.y = canvas.height - paddleHeight;
+
+      rightPaddle.y += rightPaddle.dy;
+      if (rightPaddle.y < 0 || rightPaddle.y + paddleHeight > canvas.height) rightPaddle.dy *= -1;
+
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      if (ball.y - ball.size < 0 || ball.y + ball.size > canvas.height) ball.dy *= -1;
+
+      if (ball.x - ball.size < leftPaddle.x + paddleWidth &&
+          ball.y > leftPaddle.y &&
+          ball.y < leftPaddle.y + paddleHeight) {
+        ball.dx *= -1;
+        ball.x = leftPaddle.x + paddleWidth + ball.size;
+      }
+
+      if (ball.x + ball.size > rightPaddle.x &&
+          ball.y > rightPaddle.y &&
+          ball.y < rightPaddle.y + paddleHeight) {
+        ball.dx *= -1;
+        ball.x = rightPaddle.x - ball.size;
+      }
+
+      if (ball.x < 0) { rightScore++; resetBall(); }
+      if (ball.x > canvas.width) { leftScore++; resetBall(); }
+    }
+
+    function resetBall() {
+      ball.x = canvas.width/2;
+      ball.y = canvas.height/2;
+      ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+      ball.dy = 4 * (Math.random() > 0.5 ? 1 : -1);
+    }
+
+    function game() {
+      move();
+      draw();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowUp") leftPaddle.dy = -6;
+      else if (e.key === "ArrowDown") leftPaddle.dy = 6;
+    });
+
+    document.addEventListener("keyup", e => {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") leftPaddle.dy = 0;
+    });
+
+    setInterval(game, 30);
+  </script>
 </body>
 </html>
